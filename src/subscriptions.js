@@ -32,10 +32,20 @@ export default class RTSubscriptions {
   reconnectSubscriptions() {
     Object
       .keys(this.subscriptions)
-      .forEach(subscriptionId => this.onSubscription(subscriptionId))
+      .forEach(subscriptionId => {
+        const subscription = this.subscriptions[subscriptionId]
+
+        if (subscription.keepAlive === false) {
+          delete this.subscriptions[subscriptionId]
+        } else {
+          subscription.ready = false
+
+          this.onSubscription(subscriptionId)
+        }
+      })
   }
 
-  subscribe(name, options, { parser, onData, onError, onStop, onReady }) {
+  subscribe(name, options, { keepAlive, parser, onData, onError, onStop, onReady }) {
     this.initialize()
 
     const subscriptionId = RTUtils.generateUID()
@@ -43,6 +53,7 @@ export default class RTSubscriptions {
     this.subscriptions[subscriptionId] = {
       data : { id: subscriptionId, name, options },
       ready: false,
+      keepAlive,
       parser,
       onData,
       onError,

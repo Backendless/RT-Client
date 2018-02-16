@@ -21,7 +21,7 @@ export default class RTScopeConnector extends RTListeners {
    * puts the method's execution to pool and run it immediately after connected to Connection Scope.
    * if the instance is already connected to the scope the method will be executed immediately
    **/
-  static delayedOperation = delayedOperation
+  static connectionRequired = connectionRequired
 
   /**
    * @abstract getter, must be overridden in an inherited class
@@ -67,7 +67,7 @@ export default class RTScopeConnector extends RTListeners {
 
     this.options = options
 
-    this.delayedOperations = []
+    this.waitConnection = []
 
     this.connect()
   }
@@ -127,8 +127,16 @@ export default class RTScopeConnector extends RTListeners {
    * @private method
    **/
   onConnect() {
-    this.delayedOperations.forEach(operation => operation())
-    this.delayedOperations = []
+    Object.keys(this.subscriptions).map(listenerType => {
+      this.subscriptions[listenerType].forEach(({ restoreOnReconnect, restore }) => {
+        if (restoreOnReconnect) {
+          restore()
+        }
+      })
+    })
+
+    this.waitConnection.forEach(operation => operation())
+    this.waitConnection = []
 
     this.runSimpleListeners(ListenerTypes.CONNECT)
   }
@@ -147,13 +155,21 @@ export default class RTScopeConnector extends RTListeners {
     this.connection = null
   }
 
+  addScopeSubscription(type, subscriberFn, options) {
+    const subscriptionStore = this.addSubscription(type, subscriberFn, { keepAlive: false, ...options })
+
+    subscriptionStore.restoreOnReconnect = true
+  }
+
   /**
    * @public method
    **/
   removeAllListeners() {
-    this.delayedOperations = []
+    this.waitConnection = []
 
     super.removeAllListeners()
+
+    return this
   }
 
   /**
@@ -165,6 +181,8 @@ export default class RTScopeConnector extends RTListeners {
     if (onError) {
       this.addSimpleListener(ListenerTypes.ERROR, onError)
     }
+
+    return this
   }
 
   /**
@@ -176,51 +194,61 @@ export default class RTScopeConnector extends RTListeners {
     if (onError) {
       this.removeSimpleListener(ListenerTypes.ERROR, onError)
     }
+
+    return this
   }
 
   /**
    * @public method
    **/
-  @delayedOperation()
+  @connectionRequired()
   addCommandListener(callback, onError) {
-    this.addSubscription(ListenerTypes.COMMAND, this.commandSubscriber, { callback, onError })
+    this.addScopeSubscription(ListenerTypes.COMMAND, this.commandSubscriber, { callback, onError })
+
+    return this
   }
 
   /**
    * @public method
    **/
-  @delayedOperation()
+  @connectionRequired()
   removeCommandListeners(callback) {
     this.stopSubscription(ListenerTypes.COMMAND, { callback })
+
+    return this
   }
 
   /**
    * @public method
    **/
-  @delayedOperation()
+  @connectionRequired()
   addUserStatusListener(callback, onError) {
-    this.addSubscription(ListenerTypes.USER_STATUS, this.usersSubscriber, { callback, onError })
+    this.addScopeSubscription(ListenerTypes.USER_STATUS, this.usersSubscriber, { callback, onError })
+
+    return this
   }
 
   /**
    * @public method
    **/
-  @delayedOperation()
+  @connectionRequired()
   removeUserStatusListeners(callback) {
     this.stopSubscription(ListenerTypes.USER_STATUS, { callback })
+
+    return this
   }
 
   /**
    * @public method
    **/
-  @delayedOperation(true)
+  @connectionRequired(true)
   send(type, data) {
     return this.commandSender({ ...this.getScopeOptions(), type, data })
   }
 
 }
 
-function delayedOperation(returnPromise) {
+function connectionRequired(returnPromise) {
   return function (target, key, descriptor) {
     const decorated = descriptor.value
 
@@ -232,10 +260,12 @@ function delayedOperation(returnPromise) {
       }
 
       if (returnPromise) {
-        return new Promise((resolve, reject) => this.delayedOperations.push(() => run().then(resolve, reject)))
+        return new Promise((resolve, reject) => this.waitConnection.push(() => run().then(resolve, reject)))
       }
 
-      this.delayedOperations.push(run)
+      this.waitConnection.push(run)
+
+      return this
     }
 
     return descriptor

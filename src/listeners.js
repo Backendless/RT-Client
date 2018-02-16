@@ -5,7 +5,7 @@ export default class RTListeners {
     this.simpleListeners = {}
   }
 
-  addSubscription(type, subscriberFn, { callback, onError, parser, extraOptions }) {
+  addSubscription(type, subscriberFn, { callback, onError, parser, extraOptions, keepAlive }) {
     const subscriptionsStack = this.subscriptions[type] = this.subscriptions[type] || []
 
     const options = {
@@ -13,14 +13,25 @@ export default class RTListeners {
       ...extraOptions
     }
 
-    const subscription = subscriberFn(options, {
-      parser,
-      onData : callback,
-      onError: onError,
-      onStop : () => this.subscriptions[type] = this.subscriptions[type].filter(s => s.subscription !== subscription),
-    })
+    const subscriptionStore = { callback, extraOptions, restore: run }
 
-    subscriptionsStack.push({ callback, extraOptions, subscription })
+    function run() {
+      const subscription = subscriberFn(options, {
+        keepAlive,
+        parser,
+        onData : callback,
+        onError: onError,
+        onStop : () => this.subscriptions[type] = this.subscriptions[type].filter(s => s.subscription !== subscription),
+      })
+
+      subscriptionStore.subscription = subscription
+    }
+
+    subscriptionsStack.push(subscriptionStore)
+
+    run()
+
+    return subscriptionStore
   }
 
   getSubscriptionOptions() {
