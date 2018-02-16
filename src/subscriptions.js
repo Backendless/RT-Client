@@ -1,26 +1,5 @@
+import { RTSocketEvents, RTSubscriptionTypes } from './constants'
 import RTUtils from './utils'
-
-const Events = {
-  SUB_ON : 'SUB_ON',
-  SUB_OFF: 'SUB_OFF',
-  SUB_RES: 'SUB_RES',
-}
-
-const Types = {
-  OBJECTS_CHANGES: 'OBJECTS_CHANGES',
-
-  PUB_SUB_CONNECT : 'PUB_SUB_CONNECT',
-  PUB_SUB_MESSAGES: 'PUB_SUB_MESSAGES',
-  PUB_SUB_COMMANDS: 'PUB_SUB_COMMANDS',
-  PUB_SUB_USERS   : 'PUB_SUB_USERS',
-
-  RSO_CONNECT : 'RSO_CONNECT',
-  RSO_CHANGES : 'RSO_CHANGES',
-  RSO_CLEARED : 'RSO_CLEARED',
-  RSO_COMMANDS: 'RSO_COMMANDS',
-  RSO_INVOKE  : 'RSO_INVOKE',
-  RSO_USERS   : 'RSO_USERS',
-}
 
 const subscription = type => function (options, callbacks) {
   return this.subscribe(type, options, callbacks)
@@ -36,7 +15,7 @@ export default class RTSubscriptions {
 
   initialize() {
     if (!this.initialized) {
-      this.rtProvider.on(Events.SUB_RES, data => this.onSubscriptionResponse(data))
+      this.rtProvider.on(RTSocketEvents.SUB_RES, data => this.onSubscriptionResponse(data))
 
       this.initialized = true
     }
@@ -89,14 +68,14 @@ export default class RTSubscriptions {
   onSubscription(subscriptionId) {
     const subscription = this.subscriptions[subscriptionId]
 
-    this.rtProvider.emit(Events.SUB_ON, subscription.data)
+    this.rtProvider.emit(RTSocketEvents.SUB_ON, subscription.data)
   }
 
   offSubscription(subscriptionId) {
     const subscription = this.subscriptions[subscriptionId]
 
     if (subscription) {
-      this.rtProvider.emit(Events.SUB_OFF, { id: subscriptionId })
+      this.rtProvider.emit(RTSocketEvents.SUB_OFF, { id: subscriptionId })
 
       if (subscription.onStop) {
         subscription.onStop()
@@ -145,7 +124,7 @@ export default class RTSubscriptions {
   //---------------------------------------//
   //----------- DATA SUBSCRIPTIONS --------//
 
-  onObjectsChanges = subscription(Types.OBJECTS_CHANGES).bind(this)
+  onObjectsChanges = subscription(RTSubscriptionTypes.OBJECTS_CHANGES).bind(this)
 
   //----------- DATA SUBSCRIPTIONS --------//
   //---------------------------------------//
@@ -153,10 +132,10 @@ export default class RTSubscriptions {
   //---------------------------------------//
   //-------- PUB_SUB SUBSCRIPTIONS --------//
 
-  connectToPubSub = subscription(Types.PUB_SUB_CONNECT).bind(this)
-  onPubSubMessage = subscription(Types.PUB_SUB_MESSAGES).bind(this)
-  onPubSubCommand = subscription(Types.PUB_SUB_COMMANDS).bind(this)
-  onPubSubUserStatus = subscription(Types.PUB_SUB_USERS).bind(this)
+  connectToPubSub = subscription(RTSubscriptionTypes.PUB_SUB_CONNECT).bind(this)
+  onPubSubMessage = subscription(RTSubscriptionTypes.PUB_SUB_MESSAGES).bind(this)
+  onPubSubCommand = subscription(RTSubscriptionTypes.PUB_SUB_COMMANDS).bind(this)
+  onPubSubUserStatus = subscription(RTSubscriptionTypes.PUB_SUB_USERS).bind(this)
 
   //-------- PUB_SUB SUBSCRIPTIONS --------//
   //---------------------------------------//
@@ -164,12 +143,12 @@ export default class RTSubscriptions {
   //---------------------------------------//
   //----------- RSO SUBSCRIPTIONS ---------//
 
-  connectToRSO = subscription(Types.RSO_CONNECT).bind(this)
-  onRSOChanges = subscription(Types.RSO_CHANGES).bind(this)
-  onRSOClear = subscription(Types.RSO_CLEARED).bind(this)
-  onRSOCommand = subscription(Types.RSO_COMMANDS).bind(this)
-  onRSOInvoke = subscription(Types.RSO_INVOKE).bind(this)
-  onRSOUserStatus = subscription(Types.RSO_USERS).bind(this)
+  connectToRSO = subscription(RTSubscriptionTypes.RSO_CONNECT).bind(this)
+  onRSOChanges = subscription(RTSubscriptionTypes.RSO_CHANGES).bind(this)
+  onRSOClear = subscription(RTSubscriptionTypes.RSO_CLEARED).bind(this)
+  onRSOCommand = subscription(RTSubscriptionTypes.RSO_COMMANDS).bind(this)
+  onRSOInvoke = subscription(RTSubscriptionTypes.RSO_INVOKE).bind(this)
+  onRSOUserStatus = subscription(RTSubscriptionTypes.RSO_USERS).bind(this)
 
   //----------- RSO SUBSCRIPTIONS ---------//
   //---------------------------------------//

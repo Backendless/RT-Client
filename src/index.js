@@ -13,7 +13,6 @@ const BackendlessRTClient = {
   ScopeConnector,
 }
 
-
 if (root) {
   root.BackendlessRTClient = BackendlessRTClient
 }
