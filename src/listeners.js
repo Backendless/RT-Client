@@ -13,9 +13,7 @@ export default class RTListeners {
       ...extraOptions
     }
 
-    const subscriptionStore = { callback, extraOptions, restore: run }
-
-    function run() {
+    const run = () => {
       const subscription = subscriberFn(options, {
         keepAlive,
         parser,
@@ -26,6 +24,9 @@ export default class RTListeners {
 
       subscriptionStore.subscription = subscription
     }
+
+    //TODO: rename "extraOptions" to "params"
+    const subscriptionStore = { callback, extraOptions, restore: run }
 
     subscriptionsStack.push(subscriptionStore)
 

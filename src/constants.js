@@ -36,6 +36,14 @@ export const RTSubscriptionTypes = {
   RSO_COMMANDS: 'RSO_COMMANDS',
   RSO_INVOKE  : 'RSO_INVOKE',
   RSO_USERS   : 'RSO_USERS',
+
+  //-----------------------------------------//
+  //----------- FOR CONSOLE ONLY ------------//
+
+  BL_LOGGING_MESSAGES: 'BL_LOGGING_MESSAGES',
+
+  //----------- FOR CONSOLE ONLY ------------//
+  //-----------------------------------------//
 }
 
 export const RTMethodTypes = {

@@ -49,6 +49,7 @@ export default class RTSocket {
     }
 
     this.ioSocket = io(`${host}/${Config.appId}`, {
+      forceNew    : true,
       autoConnect : false,
       reconnection: false,
       path        : `/${Config.appId}`,

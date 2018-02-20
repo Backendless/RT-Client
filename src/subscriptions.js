@@ -132,35 +132,51 @@ export default class RTSubscriptions {
     }
   }
 
-  //---------------------------------------//
-  //----------- DATA SUBSCRIPTIONS --------//
+  /******************************************************************************* **/
+  /******************************************************************************* **/
+  /** API's SUBSCRIPTIONS ******************************************************** **/
 
-  onObjectsChanges = subscription(RTSubscriptionTypes.OBJECTS_CHANGES).bind(this)
+  /***************************************** **/
+  /***** DATA SUBSCRIPTIONS **************** **/
+  /** */ onObjectsChanges = subscription(RTSubscriptionTypes.OBJECTS_CHANGES).bind(this)
+  /***** DATA SUBSCRIPTIONS **************** **/
+  /***************************************** **/
 
-  //----------- DATA SUBSCRIPTIONS --------//
-  //---------------------------------------//
+  /***************************************** **/
+  /***** PUB_SUB SUBSCRIPTIONS ************* **/
+  /** */ connectToPubSub = subscription(RTSubscriptionTypes.PUB_SUB_CONNECT).bind(this)
+  /** */ onPubSubMessage = subscription(RTSubscriptionTypes.PUB_SUB_MESSAGES).bind(this)
+  /** */ onPubSubCommand = subscription(RTSubscriptionTypes.PUB_SUB_COMMANDS).bind(this)
+  /** */ onPubSubUserStatus = subscription(RTSubscriptionTypes.PUB_SUB_USERS).bind(this)
+  /***** PUB_SUB SUBSCRIPTIONS ************* **/
+  /***************************************** **/
 
-  //---------------------------------------//
-  //-------- PUB_SUB SUBSCRIPTIONS --------//
+  /***************************************** **/
+  /***** RSO SUBSCRIPTIONS ***************** **/
+  /** */ connectToRSO = subscription(RTSubscriptionTypes.RSO_CONNECT).bind(this)
+  /** */ onRSOChanges = subscription(RTSubscriptionTypes.RSO_CHANGES).bind(this)
+  /** */ onRSOClear = subscription(RTSubscriptionTypes.RSO_CLEARED).bind(this)
+  /** */ onRSOCommand = subscription(RTSubscriptionTypes.RSO_COMMANDS).bind(this)
+  /** */ onRSOInvoke = subscription(RTSubscriptionTypes.RSO_INVOKE).bind(this)
+  /** */ onRSOUserStatus = subscription(RTSubscriptionTypes.RSO_USERS).bind(this)
+  /***** RSO SUBSCRIPTIONS ***************** **/
+  /***************************************** **/
 
-  connectToPubSub = subscription(RTSubscriptionTypes.PUB_SUB_CONNECT).bind(this)
-  onPubSubMessage = subscription(RTSubscriptionTypes.PUB_SUB_MESSAGES).bind(this)
-  onPubSubCommand = subscription(RTSubscriptionTypes.PUB_SUB_COMMANDS).bind(this)
-  onPubSubUserStatus = subscription(RTSubscriptionTypes.PUB_SUB_USERS).bind(this)
+  /** API's SUBSCRIPTIONS ******************************************************** **/
+  /******************************************************************************* **/
+  /******************************************************************************* **/
 
-  //-------- PUB_SUB SUBSCRIPTIONS --------//
-  //---------------------------------------//
+  /******************************************************************************* **/
+  /******************************************************************************* **/
+  /** CONSOLE's SUBSCRIPTIONS **************************************************** **/
 
-  //---------------------------------------//
-  //----------- RSO SUBSCRIPTIONS ---------//
+  /***************************************** **/
+  /***** BUSINESS_LOGIC SUBSCRIPTIONS ****** **/
+  /** */ onBlLoggingMessages = subscription(RTSubscriptionTypes.BL_LOGGING_MESSAGES).bind(this)
+  /***** BUSINESS_LOGIC SUBSCRIPTIONS ****** **/
+  /***************************************** **/
 
-  connectToRSO = subscription(RTSubscriptionTypes.RSO_CONNECT).bind(this)
-  onRSOChanges = subscription(RTSubscriptionTypes.RSO_CHANGES).bind(this)
-  onRSOClear = subscription(RTSubscriptionTypes.RSO_CLEARED).bind(this)
-  onRSOCommand = subscription(RTSubscriptionTypes.RSO_COMMANDS).bind(this)
-  onRSOInvoke = subscription(RTSubscriptionTypes.RSO_INVOKE).bind(this)
-  onRSOUserStatus = subscription(RTSubscriptionTypes.RSO_USERS).bind(this)
-
-  //----------- RSO SUBSCRIPTIONS ---------//
-  //---------------------------------------//
+  /** CONSOLE's SUBSCRIPTIONS **************************************************** **/
+  /******************************************************************************* **/
+  /******************************************************************************* **/
 }

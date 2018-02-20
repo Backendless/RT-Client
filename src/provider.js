@@ -37,18 +37,37 @@ const RTProvider = {
   removeReconnectAttemptEventListener: unsubscribeNativeEvent(NativeSocketEvents.RECONNECT_ATTEMPT),
 
   init(config) {
+    this.terminate()
+
+    Config.set(config)
+
+    this.nativeEvents = {}
+    this.subscriptions = new Subscriptions(this)
+    this.methods = new Methods(this)
+  },
+
+  reconfig(config) {
     this.destroyConnection()
 
     Config.set(config)
+
+    this.provideConnection()
+  },
+
+  terminate() {
+    this.destroyConnection()
 
     this.connected = false
     this.connectAttempt = 0
     this.requireRestorePrevConnection = false
 
-    this.nativeEvents = {}
+    delete this.nativeEvents
+    delete this.subscriptions
+    delete this.methods
+  },
 
-    this.subscriptions = new Subscriptions(this)
-    this.methods = new Methods(this)
+  isRunning() {
+    return !!this.socketPromise
   },
 
   addNativeEventListener(event, callback) {
@@ -83,6 +102,13 @@ const RTProvider = {
   tryToConnect() {
     this.connectAttempt = this.connectAttempt + 1
 
+    const factor = INITIAL_RECONNECTION_TIMEOUT * Math.pow(2, this.connectAttempt)
+    const timeout = Math.min(factor, MAX_RECONNECTION_TIMEOUT)
+
+    if (this.connectAttempt > 1) {
+      this.onReconnectAttempt(this.connectAttempt - 1, timeout)
+    }
+
     return Socket.connect(this.onDisconnect.bind(this))
       .then(rtSocket => {
         this.onConnect()
@@ -90,17 +116,10 @@ const RTProvider = {
         return rtSocket
       })
       .catch(error => {
-        const factor = INITIAL_RECONNECTION_TIMEOUT * Math.pow(2, this.connectAttempt)
-        const timeout = Math.min(factor, MAX_RECONNECTION_TIMEOUT)
-
         this.onConnectError(error)
 
         // wait for 400|800|1600|...|MAX_RECONNECTION_TIMEOUT milliseconds
-        return wait(timeout).then(() => {
-          this.onConnectAttempt(this.connectAttempt - 1, timeout)
-
-          return this.tryToConnect()
-        })
+        return wait(timeout).then(() => this.tryToConnect())
       })
   },
 
@@ -135,10 +154,10 @@ const RTProvider = {
   },
 
   onConnectError(error) {
-    this.runNativeEventListeners(NativeSocketEvents.CONNECT_ERROR, error)
+    this.runNativeEventListeners(NativeSocketEvents.CONNECT_ERROR, error && error.message || error)
   },
 
-  onConnectAttempt(attempt, timeout) {
+  onReconnectAttempt(attempt, timeout) {
     this.runNativeEventListeners(NativeSocketEvents.RECONNECT_ATTEMPT, attempt, timeout)
   },
 
