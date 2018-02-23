@@ -26,7 +26,12 @@ export default class RTListeners {
     }
 
     //TODO: rename "extraOptions" to "params"
-    const subscriptionStore = { callback, extraOptions, restore: run }
+    const subscriptionStore = {
+      callback,
+      extraOptions,
+      restore: run,
+      stop   : () => subscriptionStore.subscription.stop()
+    }
 
     subscriptionsStack.push(subscriptionStore)
 

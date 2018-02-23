@@ -1,4 +1,5 @@
 export const NativeSocketEvents = {
+  CONNECTING       : 'connecting',
   CONNECT          : 'connect',
   CONNECT_ERROR    : 'connect_error',
   CONNECT_TIMEOUT  : 'connect_timeout',
