@@ -23,25 +23,9 @@ export default class RTSubscriptions {
     }
   }
 
-  terminate() {
-    Object
-      .keys(this.subscriptions)
-      .forEach(subscriptionId => this.stopSubscription(subscriptionId))
-  }
+  stopped() {
+    this.initialized = false
 
-  reconnect() {
-    if (this.initialized) {
-      this.initialized = false
-      this.initialize()
-      this.reconnectSubscriptions()
-    }
-  }
-
-  hasActivity() {
-    return !!Object.keys(this.subscriptions).length
-  }
-
-  reconnectSubscriptions() {
     Object
       .keys(this.subscriptions)
       .forEach(subscriptionId => {
@@ -49,12 +33,36 @@ export default class RTSubscriptions {
 
         if (subscription.keepAlive === false) {
           delete this.subscriptions[subscriptionId]
+
         } else {
+          subscription.sent = false
+        }
+      })
+  }
+
+  reset() {
+    Object
+      .keys(this.subscriptions)
+      .forEach(subscriptionId => this.stopSubscription(subscriptionId))
+  }
+
+  restore() {
+    this.initialize()
+
+    Object.keys(this.subscriptions)
+      .forEach(subscriptionId => {
+        const subscription = this.subscriptions[subscriptionId]
+
+        if (!subscription.sent) {
           subscription.ready = false
 
           this.startSubscription(subscriptionId)
         }
       })
+  }
+
+  hasActivity() {
+    return !!Object.keys(this.subscriptions).length
   }
 
   subscribe(name, options, { keepAlive, parser, onData, onError, onStop, onReady }) {
@@ -65,6 +73,7 @@ export default class RTSubscriptions {
     this.subscriptions[subscriptionId] = {
       data : { id: subscriptionId, name, options },
       ready: false,
+      sent : false,
       keepAlive,
       parser,
       onData,
@@ -90,6 +99,8 @@ export default class RTSubscriptions {
 
   startSubscription(subscriptionId) {
     const subscription = this.subscriptions[subscriptionId]
+
+    subscription.sent = true
 
     this.emitMessage(RTSocketEvents.SUB_ON, subscription.data)
   }

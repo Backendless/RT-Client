@@ -23,15 +23,12 @@ export default class RTMethods {
     }
   }
 
-  terminate() {
-    this.invocations = {}
+  stopped() {
+    this.initialized = false
   }
 
-  reconnect() {
-    if (this.initialized) {
-      this.initialized = false
-      this.initialize()
-    }
+  reset() {
+    this.invocations = {}
   }
 
   hasActivity() {
