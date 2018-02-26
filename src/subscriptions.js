@@ -7,18 +7,26 @@ const subscription = type => function (options, callbacks) {
 
 export default class RTSubscriptions {
 
-  constructor(rtProvider) {
-    this.rtProvider = rtProvider
+  constructor({ onMessage, emitMessage, terminateSocketIfNeeded }) {
+    this.onMessage = onMessage
+    this.emitMessage = emitMessage
+    this.terminateSocketIfNeeded = terminateSocketIfNeeded
 
     this.subscriptions = {}
   }
 
   initialize() {
     if (!this.initialized) {
-      this.rtProvider.on(RTSocketEvents.SUB_RES, data => this.onSubscriptionResponse(data))
+      this.onMessage(RTSocketEvents.SUB_RES, data => this.onSubscriptionResponse(data))
 
       this.initialized = true
     }
+  }
+
+  terminate() {
+    Object
+      .keys(this.subscriptions)
+      .forEach(subscriptionId => this.stopSubscription(subscriptionId))
   }
 
   reconnect() {
@@ -27,6 +35,10 @@ export default class RTSubscriptions {
       this.initialize()
       this.reconnectSubscriptions()
     }
+  }
+
+  hasActivity() {
+    return !!Object.keys(this.subscriptions).length
   }
 
   reconnectSubscriptions() {
@@ -40,7 +52,7 @@ export default class RTSubscriptions {
         } else {
           subscription.ready = false
 
-          this.onSubscription(subscriptionId)
+          this.startSubscription(subscriptionId)
         }
       })
   }
@@ -61,7 +73,7 @@ export default class RTSubscriptions {
       onReady,
     }
 
-    this.onSubscription(subscriptionId)
+    this.startSubscription(subscriptionId)
 
     return {
       isReady: () => {
@@ -76,23 +88,33 @@ export default class RTSubscriptions {
     }
   }
 
-  onSubscription(subscriptionId) {
+  startSubscription(subscriptionId) {
     const subscription = this.subscriptions[subscriptionId]
 
-    this.rtProvider.emit(RTSocketEvents.SUB_ON, subscription.data)
+    this.emitMessage(RTSocketEvents.SUB_ON, subscription.data)
+  }
+
+  stopSubscription(subscriptionId) {
+    const subscription = this.subscriptions[subscriptionId]
+
+    if (subscription) {
+      if (subscription.onStop) {
+        subscription.onStop()
+      }
+
+      delete this.subscriptions[subscriptionId]
+
+      this.terminateSocketIfNeeded()
+    }
   }
 
   offSubscription(subscriptionId) {
     const subscription = this.subscriptions[subscriptionId]
 
     if (subscription) {
-      this.rtProvider.emit(RTSocketEvents.SUB_OFF, { id: subscriptionId })
+      this.emitMessage(RTSocketEvents.SUB_OFF, { id: subscriptionId })
 
-      if (subscription.onStop) {
-        subscription.onStop()
-      }
-
-      delete this.subscriptions[subscriptionId]
+      this.stopSubscription(subscriptionId)
     }
   }
 
@@ -106,11 +128,7 @@ export default class RTSubscriptions {
           subscription.onError(error)
         }
 
-        if (subscription.onStop) {
-          subscription.onStop(error)
-        }
-
-        delete this.subscriptions[id]
+        this.stopSubscription(id)
 
       } else {
         if (!subscription.ready) {

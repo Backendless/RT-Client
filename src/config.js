@@ -3,11 +3,16 @@ const isString = value => typeof value === 'string'
 const isFunction = value => typeof value === 'function'
 const isObject = value => typeof value === 'object' && value !== null
 
-const RTConfig = {
-  appId       : null,
-  lookupPath  : null,
-  debugMode   : false,
-  connectQuery: {},
+export default class RTConfig {
+
+  constructor(config) {
+    this.appId = null
+    this.lookupPath = null
+    this.debugMode = false
+    this.connectQuery = {}
+
+    this.set(config)
+  }
 
   set(config) {
     if (!config) {
@@ -45,15 +50,11 @@ const RTConfig = {
         throw new Error('"connectQuery" must be Function or Object.')
       }
     }
-  },
+  }
 
-  /**
-   * @abstract
-   **/
   getConnectQuery() {
     return this.connectQuery
-  },
+  }
 
 }
 
-export default RTConfig

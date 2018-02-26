@@ -1,22 +1,20 @@
-import Config from './config'
-import Provider from './provider'
+import RTClient from './client'
 import Listeners from './listeners'
 import ScopeConnector from './scope-connector'
 
 const root = (typeof self === 'object' && self.self === self && self) ||
   (typeof global === 'object' && global.global === global && global)
 
-const BackendlessRTClient = {
-  Config,
-  Provider,
-  Listeners,
-  ScopeConnector,
-}
+RTClient.Listeners = Listeners
+RTClient.ScopeConnector = ScopeConnector
 
 if (root) {
-  root.BackendlessRTClient = BackendlessRTClient
+  root.BackendlessRTClient = RTClient
 }
 
-module.exports = BackendlessRTClient
+module.exports = RTClient
 
-export default BackendlessRTClient
+export default RTClient
+export const RTListeners = Listeners
+export const RTScopeConnector = ScopeConnector
+

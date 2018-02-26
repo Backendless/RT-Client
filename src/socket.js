@@ -1,20 +1,19 @@
 import io from 'socket.io-client'
 import Request from 'backendless-request'
 
-import Config from './config'
 import { NativeSocketEvents } from './constants'
 
 export default class RTSocket {
 
-  static connect(onDisconnect) {
-    if (!Config.lookupPath) {
-      throw new Error('RTConfig.lookupPath is not configured')
+  static connect(config, onDisconnect) {
+    if (!config.lookupPath) {
+      throw new Error('config.lookupPath is not configured')
     }
 
-    return Request.get(Config.lookupPath)
+    return Request.get(config.lookupPath)
       .then(rtServerHost => {
         return new Promise((resolve, reject) => {
-          const rtSocket = new RTSocket(rtServerHost)
+          const rtSocket = new RTSocket(config, rtServerHost)
 
           rtSocket.on(NativeSocketEvents.CONNECT, onConnect)
           rtSocket.on(NativeSocketEvents.CONNECT_ERROR, onError)
@@ -41,19 +40,21 @@ export default class RTSocket {
       })
   }
 
-  constructor(host) {
+  constructor(config, host) {
+    this.config = config
+
     this.events = {}
 
-    if (!Config.appId) {
-      throw new Error('RTConfig.appId is not configured')
+    if (!config.appId) {
+      throw new Error('config.appId is not configured')
     }
 
-    this.ioSocket = io(`${host}/${Config.appId}`, {
+    this.ioSocket = io(`${host}/${this.config.appId}`, {
       forceNew    : true,
       autoConnect : false,
       reconnection: false,
-      path        : `/${Config.appId}`,
-      query       : Config.getConnectQuery()
+      path        : `/${this.config.appId}`,
+      query       : this.config.getConnectQuery()
     })
   }
 
@@ -91,7 +92,9 @@ export default class RTSocket {
   }
 
   onEvent(event, data) {
-    logMessage('FROM SERVER', event, data)
+    if (this.config.debugMode) {
+      logMessage('FROM SERVER', event, data)
+    }
 
     if (this.events[event]) {
       this.events[event].forEach(callback => callback(data))
@@ -99,7 +102,9 @@ export default class RTSocket {
   }
 
   emit(event, data) {
-    logMessage('TO SERVER', event, data)
+    if (this.config.debugMode) {
+      logMessage('TO SERVER', event, data)
+    }
 
     this.ioSocket.emit(event, data)
   }
@@ -107,7 +112,5 @@ export default class RTSocket {
 }
 
 function logMessage(type, event, data) {
-  if (Config.debugMode) {
-    console.log(`[${type}] - [event: ${event}] - arguments: ${JSON.stringify(data)} `)
-  }
+  console.log(`[${type}] - [event: ${event}] - arguments: ${JSON.stringify(data)} `)
 }

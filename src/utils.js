@@ -1,6 +1,6 @@
 const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
 
-const RTUtils = {
+const Utils = {
 
   generateUID() {
     //TODO: find a better solution for generate UID
@@ -11,7 +11,26 @@ const RTUtils = {
     }
 
     return hash + Date.now()
+  },
+
+  deferred: timeout => (target, key, descriptor) => {
+    let lastInvocation = null
+
+    const decorated = descriptor.value
+
+    descriptor.value = function () {
+      if (lastInvocation) {
+        clearTimeout(lastInvocation)
+      }
+
+      lastInvocation = setTimeout(() => {
+        decorated.apply(this, arguments)
+      }, timeout || 500)
+    }
+
+    return descriptor
   }
+
 }
 
-export default RTUtils
+export default Utils

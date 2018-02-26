@@ -7,18 +7,24 @@ const method = type => function (data) {
 
 export default class RTMethods {
 
-  constructor(rtProvider) {
-    this.rtProvider = rtProvider
+  constructor({ onMessage, emitMessage, terminateSocketIfNeeded }) {
+    this.onMessage = onMessage
+    this.emitMessage = emitMessage
+    this.terminateSocketIfNeeded = terminateSocketIfNeeded
 
     this.invocations = {}
   }
 
   initialize() {
     if (!this.initialized) {
-      this.rtProvider.on(RTSocketEvents.MET_RES, this.onResponse)
+      this.onMessage(RTSocketEvents.MET_RES, this.onResponse)
 
       this.initialized = true
     }
+  }
+
+  terminate() {
+    this.invocations = {}
   }
 
   reconnect() {
@@ -28,13 +34,17 @@ export default class RTMethods {
     }
   }
 
+  hasActivity() {
+    return !!Object.keys(this.invocations).length
+  }
+
   send(name, options) {
     this.initialize()
 
     const methodId = RTUtils.generateUID()
     const methodData = { id: methodId, name, options }
 
-    this.rtProvider.emit(RTSocketEvents.MET_REQ, methodData)
+    this.emitMessage(RTSocketEvents.MET_REQ, methodData)
 
     return new Promise((resolve, reject) => {
       this.invocations[methodId] = { resolve, reject }
@@ -52,6 +62,8 @@ export default class RTMethods {
       }
 
       delete this.invocations[id]
+
+      this.terminateSocketIfNeeded()
     }
   }
 
