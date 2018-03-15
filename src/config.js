@@ -8,6 +8,7 @@ export default class RTConfig {
   constructor(config) {
     this.appId = null
     this.lookupPath = null
+    this.lookupHeaders = {}
     this.debugMode = false
     this.connectQuery = {}
 
@@ -33,6 +34,14 @@ export default class RTConfig {
       }
 
       this.lookupPath = config.lookupPath
+    }
+
+    if (!isUndefined(config.lookupHeaders)) {
+      if (!isObject(config.lookupHeaders)) {
+        throw new Error('"lookupHeaders" must be Object.')
+      }
+
+      this.lookupHeaders = config.lookupHeaders
     }
 
     if (!isUndefined(config.debugMode)) {

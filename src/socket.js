@@ -11,6 +11,7 @@ export default class RTSocket {
     }
 
     return Request.get(config.lookupPath)
+      .set(config.lookupHeaders)
       .then(rtServerHost => {
         return new Promise((resolve, reject) => {
           const rtSocket = new RTSocket(config, rtServerHost)
