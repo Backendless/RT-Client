@@ -163,7 +163,7 @@ export default class RTSubscriptions {
 
   /******************************************************************************* **/
   /******************************************************************************* **/
-  /** API's SUBSCRIPTIONS ******************************************************** **/
+  /** COMMON SUBSCRIPTIONS ******************************************************** **/
 
   /***************************************** **/
   /***** DATA SUBSCRIPTIONS **************** **/
@@ -191,7 +191,7 @@ export default class RTSubscriptions {
   /***** RSO SUBSCRIPTIONS ***************** **/
   /***************************************** **/
 
-  /** API's SUBSCRIPTIONS ******************************************************** **/
+  /** COMMON SUBSCRIPTIONS ******************************************************** **/
   /******************************************************************************* **/
   /******************************************************************************* **/
 
@@ -200,9 +200,9 @@ export default class RTSubscriptions {
   /** CONSOLE's SUBSCRIPTIONS **************************************************** **/
 
   /***************************************** **/
-  /***** BUSINESS_LOGIC SUBSCRIPTIONS ****** **/
-  /** */ onBlLoggingMessages = subscription(RTSubscriptionTypes.BL_LOGGING_MESSAGES).bind(this)
-  /***** BUSINESS_LOGIC SUBSCRIPTIONS ****** **/
+  /***** LOGGING SUBSCRIPTIONS ****** **/
+  /** */ onLoggingMessages = subscription(RTSubscriptionTypes.LOGGING_MESSAGES).bind(this)
+  /***** LOGGING SUBSCRIPTIONS ****** **/
   /***************************************** **/
 
   /** CONSOLE's SUBSCRIPTIONS **************************************************** **/

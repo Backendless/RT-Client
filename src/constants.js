@@ -41,7 +41,7 @@ export const RTSubscriptionTypes = {
   //-----------------------------------------//
   //----------- FOR CONSOLE ONLY ------------//
 
-  BL_LOGGING_MESSAGES: 'BL_LOGGING_MESSAGES',
+  LOGGING_MESSAGES: 'LOGGING_MESSAGES',
 
   //----------- FOR CONSOLE ONLY ------------//
   //-----------------------------------------//
