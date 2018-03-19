@@ -1,9 +1,9 @@
 import { NativeSocketEvents } from './constants'
 import Socket from './socket'
 
-const INCREASE_RECONNECTION_TIMEOUT_STEP = 5
+const INCREASE_RECONNECTION_TIMEOUT_STEP = 10
 const INITIAL_RECONNECTION_TIMEOUT = 200
-const MAX_RECONNECTION_TIMEOUT = 60 * 60 * 1000 // a hour
+const MAX_RECONNECTION_TIMEOUT = 60 * 1000 // a minute
 
 const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds))
 
