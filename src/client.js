@@ -5,12 +5,20 @@ import Subscriptions from './subscriptions'
 import Methods from './methods'
 import Session from './session'
 
+const CONNECTION_MANAGE_EVENTS = [
+  NativeSocketEvents.CONNECTING,
+  NativeSocketEvents.CONNECT,
+  NativeSocketEvents.CONNECT_ERROR,
+  NativeSocketEvents.DISCONNECT,
+  NativeSocketEvents.RECONNECT_ATTEMPT,
+]
+
 export default class RTClient {
 
   constructor(config) {
     this.config = new Config(config)
 
-    this.nativeEvents = {}
+    this.socketEvents = {}
 
     const socketContext = {
       onMessage              : this.on.bind(this),
@@ -41,7 +49,7 @@ export default class RTClient {
 
   connect(restoreSubscriptions) {
     if (!this.session) {
-      this.session = new Session(this.config, this.runNativeEventListeners, this.onSessionDisconnect)
+      this.session = new Session(this.config, this.runSocketEventListeners, this.onSessionDisconnect)
       this.session.getSocket()
         .then(() => {
           this.subscriptions.initialize()
@@ -57,7 +65,7 @@ export default class RTClient {
   }
 
   terminate() {
-    this.nativeEvents = {}
+    this.socketEvents = {}
 
     this.subscriptions.reset()
     this.methods.reset()
@@ -74,7 +82,7 @@ export default class RTClient {
 
       delete this.session
 
-      this.runNativeEventListeners(NativeSocketEvents.DISCONNECT, reason || 'disconnected by client')
+      this.runSocketEventListeners(NativeSocketEvents.DISCONNECT, reason || 'disconnected by client')
     }
   }
 
@@ -94,47 +102,49 @@ export default class RTClient {
     this.connect(true)
   }
 
-  addNativeEventListener(event, callback) {
-    this.nativeEvents[event] = this.nativeEvents[event] || []
-    this.nativeEvents[event].push(callback)
+  addSocketEventListener(event, callback) {
+    this.socketEvents[event] = this.socketEvents[event] || []
+    this.socketEvents[event].push(callback)
 
     return this
   }
 
-  removeNativeEventListener(event, callback) {
-    if (this.nativeEvents[event]) {
-      this.nativeEvents[event] = this.nativeEvents[event].filter(cb => cb !== callback)
+  removeSocketEventListener(event, callback) {
+    if (this.socketEvents[event]) {
+      this.socketEvents[event] = this.socketEvents[event].filter(cb => cb !== callback)
 
-      if (!this.nativeEvents[event].length) {
-        delete this.nativeEvents[event]
+      if (!this.socketEvents[event].length) {
+        delete this.socketEvents[event]
       }
     }
 
     return this
   }
 
-  runNativeEventListeners = (event, ...args) => {
-    if (this.nativeEvents[event]) {
-      this.nativeEvents[event].forEach(callback => callback(...args))
+  runSocketEventListeners = (event, ...args) => {
+    if (this.socketEvents[event]) {
+      this.socketEvents[event].forEach(callback => callback(...args))
     }
   }
 
-  addConnectingEventListener = callback => this.addNativeEventListener(NativeSocketEvents.CONNECTING, callback)
-  removeConnectingEventListener = callback => this.removeNativeEventListener(NativeSocketEvents.CONNECTING, callback)
+  addConnectingEventListener = callback => this.addSocketEventListener(NativeSocketEvents.CONNECTING, callback)
+  removeConnectingEventListener = callback => this.removeSocketEventListener(NativeSocketEvents.CONNECTING, callback)
 
-  addConnectEventListener = callback => this.addNativeEventListener(NativeSocketEvents.CONNECT, callback)
-  removeConnectEventListener = callback => this.removeNativeEventListener(NativeSocketEvents.CONNECT, callback)
+  addConnectEventListener = callback => this.addSocketEventListener(NativeSocketEvents.CONNECT, callback)
+  removeConnectEventListener = callback => this.removeSocketEventListener(NativeSocketEvents.CONNECT, callback)
 
-  addConnectErrorEventListener = callback => this.addNativeEventListener(NativeSocketEvents.CONNECT_ERROR, callback)
-  removeConnectErrorEventListener = callback => this.removeNativeEventListener(NativeSocketEvents.CONNECT_ERROR, callback)
+  addConnectErrorEventListener = callback => this.addSocketEventListener(NativeSocketEvents.CONNECT_ERROR, callback)
+  removeConnectErrorEventListener = callback => this.removeSocketEventListener(NativeSocketEvents.CONNECT_ERROR, callback)
 
-  addDisconnectEventListener = callback => this.addNativeEventListener(NativeSocketEvents.DISCONNECT, callback)
-  removeDisconnectEventListener = callback => this.removeNativeEventListener(NativeSocketEvents.DISCONNECT, callback)
+  addDisconnectEventListener = callback => this.addSocketEventListener(NativeSocketEvents.DISCONNECT, callback)
+  removeDisconnectEventListener = callback => this.removeSocketEventListener(NativeSocketEvents.DISCONNECT, callback)
 
-  addReconnectAttemptEventListener = callback => this.addNativeEventListener(NativeSocketEvents.RECONNECT_ATTEMPT, callback)
-  removeReconnectAttemptEventListener = callback => this.removeNativeEventListener(NativeSocketEvents.RECONNECT_ATTEMPT, callback)
+  addReconnectAttemptEventListener = callback => this.addSocketEventListener(NativeSocketEvents.RECONNECT_ATTEMPT, callback)
+  removeReconnectAttemptEventListener = callback => this.removeSocketEventListener(NativeSocketEvents.RECONNECT_ATTEMPT, callback)
 
-
+  removeConnectionListeners = () => {
+    CONNECTION_MANAGE_EVENTS.forEach(event => this.removeSocketEventListener(event))
+  }
 }
 
 
