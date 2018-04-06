@@ -111,7 +111,9 @@ export default class RTClient {
 
   removeSocketEventListener(event, callback) {
     if (this.socketEvents[event]) {
-      this.socketEvents[event] = this.socketEvents[event].filter(cb => cb !== callback)
+      this.socketEvents[event] = callback
+        ? this.socketEvents[event].filter(cb => cb !== callback)
+        : []
 
       if (!this.socketEvents[event].length) {
         delete this.socketEvents[event]
