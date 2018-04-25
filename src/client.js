@@ -41,7 +41,7 @@ export default class RTClient {
     this.config.set(config)
 
     if (this.session) {
-      this.disconnect()
+      this.disconnect('Re-config socket connection')
 
       this.connect(true)
     }
@@ -64,19 +64,19 @@ export default class RTClient {
     return this.session.getSocket()
   }
 
-  terminate() {
+  terminate(reason) {
     this.socketEvents = {}
 
     this.subscriptions.reset()
     this.methods.reset()
 
-    this.disconnect()
+    this.disconnect(reason || 'Terminated by client')
   }
 
   disconnect(reason) {
     if (this.session) {
-      this.subscriptions.stopped()
-      this.methods.stopped()
+      this.subscriptions.stop()
+      this.methods.stop()
 
       this.session.terminate()
 
@@ -94,8 +94,8 @@ export default class RTClient {
   }
 
   onSessionDisconnect = () => {
-    this.subscriptions.stopped()
-    this.methods.stopped()
+    this.subscriptions.stop()
+    this.methods.stop()
 
     delete this.session
 
@@ -148,5 +148,3 @@ export default class RTClient {
     CONNECTION_MANAGE_EVENTS.forEach(event => this.removeSocketEventListener(event))
   }
 }
-
-

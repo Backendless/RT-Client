@@ -23,7 +23,7 @@ export default class RTSubscriptions {
     }
   }
 
-  stopped() {
+  stop() {
     this.initialized = false
 
     Object

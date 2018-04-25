@@ -23,7 +23,7 @@ export default class RTMethods {
     }
   }
 
-  stopped() {
+  stop() {
     this.initialized = false
   }
 
