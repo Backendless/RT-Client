@@ -5,37 +5,26 @@ export default class RTListeners {
     this.simpleListeners = {}
   }
 
-  addSubscription(type, subscriberFn, { callback, onError, parser, extraOptions, keepAlive }) {
+  addSubscription(type, subscriberFn, { callback, onError, parser, params }) {
     const subscriptionsStack = this.subscriptions[type] = this.subscriptions[type] || []
 
-    const options = {
-      ...this.getSubscriptionOptions(),
-      ...extraOptions
-    }
+    const subscription = subscriberFn({ ...params, ...this.getSubscriptionOptions() }, {
+      parser,
+      onData : callback,
+      onError: onError,
+      onStop : () => {
+        this.subscriptions[type] = subscriptionsStack.filter(s => s.subscription !== subscription)
+      }
+    })
 
-    const run = () => {
-      const subscription = subscriberFn(options, {
-        keepAlive,
-        parser,
-        onData : callback,
-        onError: onError,
-        onStop : () => this.subscriptions[type] = this.subscriptions[type].filter(s => s.subscription !== subscription),
-      })
-
-      subscriptionStore.subscription = subscription
-    }
-
-    //TODO: rename "extraOptions" to "params"
     const subscriptionStore = {
       callback,
-      extraOptions,
-      restore: run,
-      stop   : () => subscriptionStore.subscription.stop()
+      params,
+      subscription,
+      stop: () => subscription.stop()
     }
 
     subscriptionsStack.push(subscriptionStore)
-
-    run()
 
     return subscriptionStore
   }
@@ -44,20 +33,20 @@ export default class RTListeners {
     return {}
   }
 
-  stopSubscription(type, { callback, argumentsMatcher }) {
+  stopSubscription(type, { callback, matcher }) {
     const subscriptionsStack = this.subscriptions[type] = this.subscriptions[type] || []
 
-    if (argumentsMatcher) {
-      subscriptionsStack.forEach(s => {
-        if (argumentsMatcher(s)) {
-          s.subscription.stop()
+    if (matcher) {
+      subscriptionsStack.forEach(subscriptionStore => {
+        if (matcher(subscriptionStore)) {
+          subscriptionStore.subscription.stop()
         }
       })
 
     } else {
-      subscriptionsStack.forEach(s => {
-        if (!callback || s.callback === callback) {
-          s.subscription.stop()
+      subscriptionsStack.forEach(subscriptionStore => {
+        if (!callback || subscriptionStore.callback === callback) {
+          subscriptionStore.subscription.stop()
         }
       })
     }
@@ -84,12 +73,12 @@ export default class RTListeners {
   }
 
   removeAllListeners() {
-    Object.keys(this.subscriptions).map(listenerType => {
-      this.subscriptions[listenerType].forEach(({ subscription }) => subscription.stop())
-    })
+    Object
+      .keys(this.subscriptions)
+      .forEach(listenerType => {
+        this.subscriptions[listenerType].forEach(({ subscription }) => subscription.stop())
+      })
 
-    Object.keys(this.simpleListeners).map(listenerType => {
-      this.simpleListeners[listenerType] = []
-    })
+    this.simpleListeners = {}
   }
 }

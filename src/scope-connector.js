@@ -94,8 +94,6 @@ export default class RTScopeConnector extends RTListeners {
    **/
   disconnect() {
     if (this.isConnected()) {
-      this.removeAllListeners()
-
       this.connection.stop()
     }
   }
@@ -127,14 +125,6 @@ export default class RTScopeConnector extends RTListeners {
    * @private method
    **/
   onConnect() {
-    Object.keys(this.subscriptions).map(listenerType => {
-      this.subscriptions[listenerType].forEach(({ restoreOnReconnect, restore }) => {
-        if (restoreOnReconnect) {
-          restore()
-        }
-      })
-    })
-
     this.waitConnection.forEach(operation => operation())
     this.waitConnection = []
 
@@ -153,12 +143,6 @@ export default class RTScopeConnector extends RTListeners {
    **/
   onDisconnect() {
     this.connection = null
-  }
-
-  addScopeSubscription(type, subscriberFn, options) {
-    const subscriptionStore = this.addSubscription(type, subscriberFn, { keepAlive: false, ...options })
-
-    subscriptionStore.restoreOnReconnect = true
   }
 
   /**
@@ -203,7 +187,7 @@ export default class RTScopeConnector extends RTListeners {
    **/
   @connectionRequired()
   addCommandListener(callback, onError) {
-    this.addScopeSubscription(ListenerTypes.COMMAND, this.commandSubscriber, { callback, onError })
+    this.addSubscription(ListenerTypes.COMMAND, this.commandSubscriber, { callback, onError })
 
     return this
   }
@@ -223,7 +207,7 @@ export default class RTScopeConnector extends RTListeners {
    **/
   @connectionRequired()
   addUserStatusListener(callback, onError) {
-    this.addScopeSubscription(ListenerTypes.USER_STATUS, this.usersSubscriber, { callback, onError })
+    this.addSubscription(ListenerTypes.USER_STATUS, this.usersSubscriber, { callback, onError })
 
     return this
   }

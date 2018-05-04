@@ -29,14 +29,7 @@ export default class RTSubscriptions {
     Object
       .keys(this.subscriptions)
       .forEach(subscriptionId => {
-        const subscription = this.subscriptions[subscriptionId]
-
-        if (subscription.keepAlive === false) {
-          delete this.subscriptions[subscriptionId]
-
-        } else {
-          subscription.sent = false
-        }
+        this.subscriptions[subscriptionId].sent = false
       })
   }
 
@@ -49,7 +42,8 @@ export default class RTSubscriptions {
   restore() {
     this.initialize()
 
-    Object.keys(this.subscriptions)
+    Object
+      .keys(this.subscriptions)
       .forEach(subscriptionId => {
         const subscription = this.subscriptions[subscriptionId]
 
@@ -65,7 +59,7 @@ export default class RTSubscriptions {
     return !!Object.keys(this.subscriptions).length
   }
 
-  subscribe(name, options, { keepAlive, parser, onData, onError, onStop, onReady }) {
+  subscribe(name, options, { parser, onData, onError, onStop, onReady }) {
     this.initialize()
 
     const subscriptionId = RTUtils.generateUID()
@@ -74,7 +68,6 @@ export default class RTSubscriptions {
       data : { id: subscriptionId, name, options },
       ready: false,
       sent : false,
-      keepAlive,
       parser,
       onData,
       onError,
