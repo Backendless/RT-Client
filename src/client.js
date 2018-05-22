@@ -21,17 +21,26 @@ export default class RTClient {
     this.socketEvents = {}
 
     const socketContext = {
-      onMessage              : this.on.bind(this),
-      emitMessage            : this.emit.bind(this),
-      terminateSocketIfNeeded: this.terminateSocketIfNeeded.bind(this)
+      onMessage  : this.on.bind(this),
+      emitMessage: this.emit.bind(this),
     }
 
     this.subscriptions = new Subscriptions(socketContext)
     this.methods = new Methods(socketContext)
+
+    this.connectible = true
+    this.connected = false
   }
 
+
   connectOnMethod = method => (...args) => {
-    this.connect().then(rtSocket => rtSocket[method](...args))
+    if (this.connectible) {
+      const rtSocketPromise = this.provideConnection()
+
+      if (this.connected) {
+        rtSocketPromise.then(rtSocket => rtSocket[method](...args))
+      }
+    }
   }
 
   on = this.connectOnMethod('on')
@@ -43,34 +52,31 @@ export default class RTClient {
     if (this.session) {
       this.disconnect('Re-config socket connection')
 
-      this.connect(true)
+      this.connect()
     }
   }
 
-  connect(restoreSubscriptions) {
+  provideConnection() {
     if (!this.session) {
-      this.session = new Session(this.config, this.runSocketEventListeners, this.onSessionDisconnect)
+      this.session = new Session(this.config, this.emitSocketEventListeners, this.onSessionDisconnect)
       this.session.getSocket()
         .then(() => {
-          this.subscriptions.initialize()
+          this.connected = true
+
           this.methods.initialize()
 
-          if (restoreSubscriptions) {
-            this.subscriptions.restore()
-          }
+          this.subscriptions.initialize()
+          this.subscriptions.restore()
         })
     }
 
     return this.session.getSocket()
   }
 
-  terminate(reason) {
-    this.socketEvents = {}
+  connect() {
+    this.connectible = true
 
-    this.subscriptions.reset()
-    this.methods.reset()
-
-    this.disconnect(reason || 'Terminated by client')
+    this.provideConnection()
   }
 
   disconnect(reason) {
@@ -82,15 +88,20 @@ export default class RTClient {
 
       delete this.session
 
-      this.runSocketEventListeners(NativeSocketEvents.DISCONNECT, reason || 'disconnected by client')
+      this.emitSocketEventListeners(NativeSocketEvents.DISCONNECT, reason || 'disconnected by client')
     }
+
+    this.connectible = false
+    this.connected = false
   }
 
-  @Utils.deferred(1000)
-  terminateSocketIfNeeded() {
-    if (!this.subscriptions.hasActivity() && !this.methods.hasActivity()) {
-      this.disconnect('disconnected because of there are no active methods/subscriptions')
-    }
+  terminate(reason) {
+    this.socketEvents = {}
+
+    this.subscriptions.reset()
+    this.methods.reset()
+
+    this.disconnect(reason || 'Terminated by client')
   }
 
   onSessionDisconnect = () => {
@@ -99,7 +110,7 @@ export default class RTClient {
 
     delete this.session
 
-    this.connect(true)
+    this.provideConnection()
   }
 
   addSocketEventListener(event, callback) {
@@ -123,7 +134,7 @@ export default class RTClient {
     return this
   }
 
-  runSocketEventListeners = (event, ...args) => {
+  emitSocketEventListeners = (event, ...args) => {
     if (this.socketEvents[event]) {
       this.socketEvents[event].forEach(callback => callback(...args))
     }

@@ -11,24 +11,6 @@ const Utils = {
     }
 
     return hash + Date.now()
-  },
-
-  deferred: timeout => (target, key, descriptor) => {
-    let lastInvocation = null
-
-    const decorated = descriptor.value
-
-    descriptor.value = function () {
-      if (lastInvocation) {
-        clearTimeout(lastInvocation)
-      }
-
-      lastInvocation = setTimeout(() => {
-        decorated.apply(this, arguments)
-      }, timeout || 500)
-    }
-
-    return descriptor
   }
 
 }

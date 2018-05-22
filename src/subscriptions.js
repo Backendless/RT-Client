@@ -7,29 +7,22 @@ const subscription = type => function (options, callbacks) {
 
 export default class RTSubscriptions {
 
-  constructor({ onMessage, emitMessage, terminateSocketIfNeeded }) {
+  constructor({ onMessage, emitMessage }) {
     this.onMessage = onMessage
     this.emitMessage = emitMessage
-    this.terminateSocketIfNeeded = terminateSocketIfNeeded
 
     this.subscriptions = {}
   }
 
   initialize() {
-    if (!this.initialized) {
-      this.onMessage(RTSocketEvents.SUB_RES, data => this.onSubscriptionResponse(data))
-
-      this.initialized = true
-    }
+    this.onMessage(RTSocketEvents.SUB_RES, data => this.onSubscriptionResponse(data))
   }
 
   stop() {
-    this.initialized = false
-
     Object
       .keys(this.subscriptions)
       .forEach(subscriptionId => {
-        this.subscriptions[subscriptionId].sent = false
+        this.subscriptions[subscriptionId].ready = false
       })
   }
 
@@ -40,18 +33,10 @@ export default class RTSubscriptions {
   }
 
   restore() {
-    this.initialize()
-
     Object
       .keys(this.subscriptions)
       .forEach(subscriptionId => {
-        const subscription = this.subscriptions[subscriptionId]
-
-        if (!subscription.sent) {
-          subscription.ready = false
-
-          this.startSubscription(subscriptionId)
-        }
+        this.startSubscription(subscriptionId)
       })
   }
 
@@ -60,14 +45,11 @@ export default class RTSubscriptions {
   }
 
   subscribe(name, options, { parser, onData, onError, onStop, onReady }) {
-    this.initialize()
-
     const subscriptionId = RTUtils.generateUID()
 
     this.subscriptions[subscriptionId] = {
       data : { id: subscriptionId, name, options },
       ready: false,
-      sent : false,
       parser,
       onData,
       onError,
@@ -93,8 +75,6 @@ export default class RTSubscriptions {
   startSubscription(subscriptionId) {
     const subscription = this.subscriptions[subscriptionId]
 
-    subscription.sent = true
-
     this.emitMessage(RTSocketEvents.SUB_ON, subscription.data)
   }
 
@@ -107,8 +87,6 @@ export default class RTSubscriptions {
       }
 
       delete this.subscriptions[subscriptionId]
-
-      this.terminateSocketIfNeeded()
     }
   }
 
