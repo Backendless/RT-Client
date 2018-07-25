@@ -1,11 +1,10 @@
-import io from 'socket.io-client'
-import Request from 'backendless-request'
-
 import { NativeSocketEvents } from './constants'
 
 export default class RTSocket {
 
   static connect(config, onDisconnect) {
+    const Request = require('backendless-request')
+
     if (!config.lookupPath) {
       throw new Error('config.lookupPath is not configured')
     }
@@ -42,6 +41,8 @@ export default class RTSocket {
   }
 
   constructor(config, host) {
+    const io = require('socket.io-client')
+
     this.config = config
 
     this.events = {}

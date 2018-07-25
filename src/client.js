@@ -1,5 +1,4 @@
 import { NativeSocketEvents } from './constants'
-import Utils from './utils'
 import Config from './config'
 import Subscriptions from './subscriptions'
 import Methods from './methods'
