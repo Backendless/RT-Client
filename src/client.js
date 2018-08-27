@@ -17,7 +17,7 @@ export default class RTClient {
   constructor(config) {
     this.config = new Config(config)
 
-    this.socketEvents = {}
+    this.resetSocketEvents()
 
     const socketContext = {
       onMessage  : this.on.bind(this),
@@ -31,6 +31,18 @@ export default class RTClient {
     this.connected = false
   }
 
+  resetSocketEvents() {
+    this.socketEvents = {}
+    this.addConnectErrorEventListener(this.onConnectError)
+  }
+
+  onConnectError = () => {
+    if (!this.subscriptions.hasActivity() && !this.methods.hasActivity()) {
+      this.disconnect('There are no active subscriptions and methods')
+
+      this.connectible = true
+    }
+  }
 
   connectOnMethod = method => (...args) => {
     if (this.connectible) {
@@ -95,7 +107,7 @@ export default class RTClient {
   }
 
   terminate(reason) {
-    this.socketEvents = {}
+    this.resetSocketEvents()
 
     this.subscriptions.reset()
     this.methods.reset()
