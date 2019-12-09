@@ -179,6 +179,7 @@ export default class RTSubscriptions {
   /***************************************** **/
   /***** CONSOLE SUBSCRIPTIONS ****** **/
   /** */ onConsoleMessages = subscription(RTSubscriptionTypes.CONSOLE_MESSAGES).bind(this)
+  /** */ onDeveloperMessage = subscription(RTSubscriptionTypes.DEVELOPER_MESSAGES).bind(this)
   /***** CONSOLE SUBSCRIPTIONS ****** **/
   /***************************************** **/
 
