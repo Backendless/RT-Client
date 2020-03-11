@@ -15,9 +15,10 @@ export const NativeSocketEvents = {
 }
 
 export const RTSocketEvents = {
-  SUB_ON : 'SUB_ON',
-  SUB_OFF: 'SUB_OFF',
-  SUB_RES: 'SUB_RES',
+  SUB_ON   : 'SUB_ON',
+  SUB_OFF  : 'SUB_OFF',
+  SUB_RES  : 'SUB_RES',
+  SUB_READY: 'SUB_READY',
 
   MET_REQ: 'MET_REQ',
   MET_RES: 'MET_RES',
