@@ -1,6 +1,6 @@
 {
   "name": "backendless-rt-client",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "Backendless RT Client for connect to Backendless RT Server",
   "browser": "dist/backendless-rt-client.js",
   "main": "lib/index.js",
@@ -57,7 +57,7 @@
     "babel-preset-stage-1": "^6.24.1",
     "babel-preset-stage-3": "^6.17.0",
     "babelify": "^8.0.0",
-    "bannerize": "^1.1.2",
+    "bannerize": "^1.1.4",
     "browserify": "^14.5.0",
     "copyfiles": "^1.1.0",
     "cross-env": "^5.1.0",
@@ -65,7 +65,7 @@
     "rimraf": "^2.6.2",
     "uglify-js": "^3.2.2",
     "watch": "^1.0.2",
-    "watchify": "^3.8.0",
+    "watchify": "^3.11.1",
     "webpack": "^3.10.0"
   },
   "dependencies": {
