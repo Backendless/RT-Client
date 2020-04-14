@@ -15,6 +15,7 @@ export default class RTSubscriptions {
   }
 
   initialize() {
+    this.onMessage(RTSocketEvents.SUB_READY, data => this.onSubscriptionReady(data))
     this.onMessage(RTSocketEvents.SUB_RES, data => this.onSubscriptionResponse(data))
   }
 
@@ -97,6 +98,18 @@ export default class RTSubscriptions {
       this.emitMessage(RTSocketEvents.SUB_OFF, { id: subscriptionId })
 
       this.stopSubscription(subscriptionId)
+    }
+  }
+
+  onSubscriptionReady({ id }) {
+    const subscription = this.subscriptions[id]
+
+    if (subscription && !subscription.ready) {
+      subscription.ready = true;
+
+      if (subscription.onReady) {
+        subscription.onReady()
+      }
     }
   }
 
