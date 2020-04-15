@@ -105,7 +105,7 @@ export default class RTSubscriptions {
     const subscription = this.subscriptions[id]
 
     if (subscription && !subscription.ready) {
-      subscription.ready = true;
+      subscription.ready = true
 
       if (subscription.onReady) {
         subscription.onReady()

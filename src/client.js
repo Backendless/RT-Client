@@ -151,6 +151,7 @@ export default class RTClient {
     }
   }
 
+  /* eslint-disable max-len */
   addConnectingEventListener = callback => this.addSocketEventListener(NativeSocketEvents.CONNECTING, callback)
   removeConnectingEventListener = callback => this.removeSocketEventListener(NativeSocketEvents.CONNECTING, callback)
 
@@ -165,6 +166,7 @@ export default class RTClient {
 
   addReconnectAttemptEventListener = callback => this.addSocketEventListener(NativeSocketEvents.RECONNECT_ATTEMPT, callback)
   removeReconnectAttemptEventListener = callback => this.removeSocketEventListener(NativeSocketEvents.RECONNECT_ATTEMPT, callback)
+  /* eslint-enable max-len */
 
   removeConnectionListeners = () => {
     CONNECTION_MANAGE_EVENTS.forEach(event => this.removeSocketEventListener(event))

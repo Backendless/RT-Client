@@ -114,5 +114,6 @@ export default class RTSocket {
 }
 
 function logMessage(type, event, data) {
+  // eslint-disable-next-line
   console.log(`[${type}] - [event: ${event}] - arguments: ${JSON.stringify(data)} `)
 }
