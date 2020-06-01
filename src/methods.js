@@ -18,6 +18,14 @@ export default class RTMethods {
     this.onMessage(RTSocketEvents.MET_RES, this.onResponse)
   }
 
+  restore() {
+    Object
+      .keys(this.invocations)
+      .forEach(invocationId => {
+        this.sendRequest(invocationId)
+      })
+  }
+
   stop() {
   }
 
@@ -30,14 +38,24 @@ export default class RTMethods {
   }
 
   send(name, options) {
-    const methodId = RTUtils.generateUID()
-    const methodData = { id: methodId, name, options }
+    const invocationId = RTUtils.generateUID()
 
-    this.emitMessage(RTSocketEvents.MET_REQ, methodData)
+    this.invocations[invocationId] = {
+      data: { id: invocationId, name, options }
+    }
+
+    this.sendRequest(invocationId)
 
     return new Promise((resolve, reject) => {
-      this.invocations[methodId] = { resolve, reject }
+      this.invocations[invocationId].resolve = resolve
+      this.invocations[invocationId].reject = reject
     })
+  }
+
+  sendRequest = invocationId => {
+    if (this.invocations[invocationId]) {
+      this.emitMessage(RTSocketEvents.MET_REQ, this.invocations[invocationId].data)
+    }
   }
 
   onResponse = ({ id, error, result }) => {

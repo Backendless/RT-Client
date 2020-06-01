@@ -75,6 +75,7 @@ export default class RTClient {
           this.connected = true
 
           this.methods.initialize()
+          this.methods.restore()
 
           this.subscriptions.initialize()
           this.subscriptions.restore()
