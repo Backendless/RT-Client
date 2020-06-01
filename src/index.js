@@ -1,3 +1,5 @@
+import Request from 'backendless-request'
+
 import RTClient from './client'
 import Listeners from './listeners'
 import ScopeConnector from './scope-connector'
@@ -5,6 +7,7 @@ import ScopeConnector from './scope-connector'
 const root = (typeof self === 'object' && self.self === self && self) ||
   (typeof global === 'object' && global.global === global && global)
 
+RTClient.Request = Request
 RTClient.Listeners = Listeners
 RTClient.ScopeConnector = ScopeConnector
 
