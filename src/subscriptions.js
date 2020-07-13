@@ -152,6 +152,7 @@ export default class RTSubscriptions {
   /***************************************** **/
   /***** DATA SUBSCRIPTIONS **************** **/
   /** */ onObjectsChanges = subscription(RTSubscriptionTypes.OBJECTS_CHANGES).bind(this)
+  /** */ onRelationsChanges = subscription(RTSubscriptionTypes.RELATIONS_CHANGES).bind(this)
   /***** DATA SUBSCRIPTIONS **************** **/
   /***************************************** **/
 
