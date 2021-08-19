@@ -6,7 +6,7 @@ export default class RTListeners {
   }
 
   addSubscription(type, subscriberFn, { callback, onError, onReady, parser, params }) {
-    const subscriptionsStack = this.subscriptions[type] = this.subscriptions[type] || []
+    this.subscriptions[type] = this.subscriptions[type] || []
 
     const subscription = subscriberFn({ ...params, ...this.getSubscriptionOptions() }, {
       parser,
@@ -14,7 +14,7 @@ export default class RTListeners {
       onError: onError,
       onReady: onReady,
       onStop : () => {
-        this.subscriptions[type] = subscriptionsStack.filter(s => s.subscription !== subscription)
+        this.subscriptions[type] = this.subscriptions[type].filter(s => s.subscription !== subscription)
       }
     })
 
@@ -25,7 +25,7 @@ export default class RTListeners {
       stop: () => subscription.stop()
     }
 
-    subscriptionsStack.push(subscriptionStore)
+    this.subscriptions[type].push(subscriptionStore)
 
     return subscriptionStore
   }
