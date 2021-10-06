@@ -104,7 +104,11 @@ export default class RTConfig {
     }
 
     if (this.socketConfigTransform) {
-      this.socketConfig = await this.socketConfigTransform(this.socketConfig)
+      const socketConfig = await this.socketConfigTransform(this.socketConfig)
+
+      if (socketConfig) {
+        this.socketConfig = socketConfig
+      }
     }
   }
 
