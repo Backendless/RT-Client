@@ -3,17 +3,11 @@ import { NativeSocketEvents } from './constants'
 export default class RTSocket {
 
   static connect(config, onDisconnect) {
-    const Request = require('backendless-request')
-
-    if (!config.lookupPath) {
-      throw new Error('config.lookupPath is not configured')
-    }
-
-    return Request.get(config.lookupPath)
-      .set(config.lookupHeaders)
-      .then(rtServerHost => {
+    return Promise.resolve()
+      .then(() => config.prepare())
+      .then(() => {
         return new Promise((resolve, reject) => {
-          const rtSocket = new RTSocket(config, rtServerHost)
+          const rtSocket = new RTSocket(config)
 
           rtSocket.on(NativeSocketEvents.CONNECT, onConnect)
           rtSocket.on(NativeSocketEvents.CONNECT_ERROR, onError)
@@ -47,17 +41,9 @@ export default class RTSocket {
 
     this.events = {}
 
-    if (!config.appId) {
-      throw new Error('config.appId is not configured')
-    }
+    const { url, options } = config.getSocketConfig()
 
-    this.ioSocket = io(`${host}/${this.config.appId}`, {
-      forceNew    : true,
-      autoConnect : false,
-      reconnection: false,
-      path        : `/${this.config.appId}`,
-      query       : this.config.getConnectQuery()
-    })
+    this.ioSocket = io(url, options)
   }
 
   connect() {

@@ -1,3 +1,5 @@
+import Request from 'backendless-request'
+
 const isUndefined = value => typeof value === 'undefined'
 const isString = value => typeof value === 'string'
 const isFunction = value => typeof value === 'function'
@@ -11,6 +13,9 @@ export default class RTConfig {
     this.lookupHeaders = {}
     this.debugMode = false
     this.connectQuery = {}
+    this.socketConfigTransform = null
+
+    this.socketConfig = null
 
     this.set(config)
   }
@@ -59,11 +64,56 @@ export default class RTConfig {
         throw new Error('"connectQuery" must be Function or Object.')
       }
     }
+
+    if (!isUndefined(config.socketConfigTransform)) {
+      if (isFunction(config.socketConfigTransform)) {
+        this.socketConfigTransform = config.socketConfigTransform
+
+      } else {
+        throw new Error('"socketConfigTransform" must be Function.')
+      }
+    }
   }
 
   getConnectQuery() {
     return this.connectQuery
   }
 
+  async prepare() {
+    if (!isString(this.lookupPath)) {
+      throw new Error('lookupPath must be String')
+    }
+
+    const host = await Request.get(this.lookupPath).set(this.lookupHeaders)
+
+    const url = this.appId ? `${ host }/${ this.appId }` : host
+    const path = this.appId ? `/${ this.appId }` : undefined
+
+    const query = this.getConnectQuery()
+
+    this.socketConfig = {
+      host,
+      url,
+      options: {
+        path,
+        query,
+        forceNew    : true,
+        autoConnect : false,
+        reconnection: false,
+      }
+    }
+
+    if (this.socketConfigTransform) {
+      const socketConfig = await this.socketConfigTransform(this.socketConfig)
+
+      if (socketConfig) {
+        this.socketConfig = socketConfig
+      }
+    }
+  }
+
+  getSocketConfig() {
+    return this.socketConfig
+  }
 }
 
