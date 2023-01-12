@@ -68,7 +68,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.18.2",
-    "backendless-request": "^0.2.0",
+    "backendless-request": "^0.4.3",
     "socket.io-client": "^2.0.3"
   }
 }

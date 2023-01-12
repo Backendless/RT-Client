@@ -12,15 +12,34 @@ export default class RTSocket {
           rtSocket.on(NativeSocketEvents.CONNECT, onConnect)
           rtSocket.on(NativeSocketEvents.CONNECT_ERROR, onError)
           rtSocket.on(NativeSocketEvents.CONNECT_TIMEOUT, onError)
-          rtSocket.on(NativeSocketEvents.ERROR, onError)
+
+          rtSocket.on(NativeSocketEvents.ERROR, error => {
+            rtSocket.log('error', 'received ERROR event while connecting', error)
+
+            closeAndReject(error)
+          })
 
           rtSocket.connect()
 
           function onConnect() {
+            rtSocket.log('log', 'socket connected')
+
             resolve(rtSocket)
           }
 
           function onError(error) {
+            rtSocket.log(
+              'error',
+              'received one of [CONNECT_ERROR,CONNECT_TIMEOUT] socket event while connecting',
+              error
+            )
+
+            closeAndReject(error)
+          }
+
+          function closeAndReject(error) {
+            rtSocket.log('log', 'close and reject socket with error:', error)
+
             rtSocket.close()
 
             reject(error)
@@ -29,6 +48,7 @@ export default class RTSocket {
       })
       .then(rtSocket => {
         rtSocket.on(NativeSocketEvents.DISCONNECT, onDisconnect)
+        rtSocket.on(NativeSocketEvents.ERROR, onDisconnect)
 
         return rtSocket
       })
@@ -51,6 +71,8 @@ export default class RTSocket {
   }
 
   close() {
+    this.log('log', 'close socket')
+
     this.events = {}
     this.ioSocket.off()
     this.ioSocket.close()
@@ -80,9 +102,7 @@ export default class RTSocket {
   }
 
   onEvent(event, data) {
-    if (this.config.debugMode) {
-      logMessage('FROM SERVER', event, data)
-    }
+    this.logMessage('FROM SERVER', event, data)
 
     if (this.events[event]) {
       this.events[event].forEach(callback => callback(data))
@@ -90,16 +110,20 @@ export default class RTSocket {
   }
 
   emit(event, data) {
-    if (this.config.debugMode) {
-      logMessage('TO SERVER', event, data)
-    }
+    this.logMessage('TO SERVER', event, data)
 
     this.ioSocket.emit(event, data)
   }
 
-}
+  log(type, ...args) {
+    if (this.config.debugMode) {
+      // eslint-disable-next-line
+      console[type]('[RT Client]:', ...args)
+    }
+  }
 
-function logMessage(type, event, data) {
-  // eslint-disable-next-line
-  console.log(`[${type}] - [event: ${event}] - arguments: ${JSON.stringify(data)} `)
+  logMessage(type, event, data) {
+    this.log('log', `[${ type }] - [event: ${ event }] - arguments: ${ JSON.stringify(data) } `)
+  }
+
 }
