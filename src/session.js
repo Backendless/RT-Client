@@ -49,6 +49,12 @@ export default class RTSession {
       })
   }
 
+  async getConnectionId() {
+    const socket = await this.getSocket()
+
+    return socket?.ioSocket?.io?.engine?.id || null
+  }
+
   connect() {
     if (this.terminated) {
       return
