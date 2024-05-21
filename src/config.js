@@ -14,6 +14,7 @@ export default class RTConfig {
     this.debugMode = false
     this.connectQuery = {}
     this.socketConfigTransform = null
+    this.getAppInfo = null
 
     this.socketConfig = null
 
@@ -23,6 +24,12 @@ export default class RTConfig {
   set(config) {
     if (!config) {
       return
+    }
+
+    if (!isUndefined(config.getAppInfo)) {
+      if (isFunction(config.getAppInfo)) {
+        this.getAppInfo = config.getAppInfo
+      }
     }
 
     if (!isUndefined(config.appId)) {
@@ -79,17 +86,33 @@ export default class RTConfig {
     return this.connectQuery
   }
 
-  async prepare() {
-    if (!isString(this.lookupPath)) {
-      throw new Error('lookupPath must be String')
+  getSocketConfig() {
+    return this.socketConfig
+  }
+
+  async getHost() {
+    let host
+
+    if (this.getAppInfo) {
+      const { rtURL } = await this.getAppInfo()
+      host = rtURL
+    } else {
+      host = await Request.get(this.lookupPath).set(this.lookupHeaders)
     }
 
-    const host = await Request.get(this.lookupPath).set(this.lookupHeaders)
+    return host
+  }
+
+  async prepare() {
+    const query = this.getConnectQuery()
+    const host = await this.getHost()
+
+    if (!host) {
+      throw new Error('Host is not defined')
+    }
 
     const url = this.appId ? `${ host }/${ this.appId }` : host
     const path = this.appId ? `/${ this.appId }` : undefined
-
-    const query = this.getConnectQuery()
 
     this.socketConfig = {
       host,
@@ -104,16 +127,8 @@ export default class RTConfig {
     }
 
     if (this.socketConfigTransform) {
-      const socketConfig = await this.socketConfigTransform(this.socketConfig)
-
-      if (socketConfig) {
-        this.socketConfig = socketConfig
-      }
+      this.socketConfig = await this.socketConfigTransform(this.socketConfig) || this.socketConfig
     }
-  }
-
-  getSocketConfig() {
-    return this.socketConfig
   }
 }
 
