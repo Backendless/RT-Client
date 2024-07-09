@@ -14,7 +14,7 @@ export default class RTConfig {
     this.debugMode = false
     this.connectQuery = {}
     this.socketConfigTransform = null
-    this.getAppInfo = null
+    this.hostResolver = null
 
     this.socketConfig = null
 
@@ -26,9 +26,9 @@ export default class RTConfig {
       return
     }
 
-    if (!isUndefined(config.getAppInfo)) {
-      if (isFunction(config.getAppInfo)) {
-        this.getAppInfo = config.getAppInfo
+    if (!isUndefined(config.hostResolver)) {
+      if (isFunction(config.hostResolver)) {
+        this.hostResolver = config.hostResolver
       }
     }
 
@@ -93,9 +93,8 @@ export default class RTConfig {
   async getHost() {
     let host
 
-    if (this.getAppInfo) {
-      const { rtURL } = await this.getAppInfo()
-      host = rtURL
+    if (this.hostResolver) {
+      host = await this.hostResolver()
     } else {
       host = await Request.get(this.lookupPath).set(this.lookupHeaders)
     }
