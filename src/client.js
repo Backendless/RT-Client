@@ -85,6 +85,14 @@ export default class RTClient {
     return this.session.getSocket()
   }
 
+  async getConnectionId() {
+    if (this.session) {
+      return await this.session.getConnectionId()
+    }
+
+    return null
+  }
+
   connect() {
     this.connectible = true
 

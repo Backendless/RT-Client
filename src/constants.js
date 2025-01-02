@@ -43,9 +43,10 @@ export const RTSubscriptionTypes = {
   //-----------------------------------------//
   //----------- FOR CONSOLE ONLY ------------//
 
-  LOGGING_MESSAGES: 'LOGGING_MESSAGES',
-  CONSOLE_MESSAGES: 'CONSOLE_MESSAGES',
-  DEVELOPER_MESSAGES: 'DEVELOPER_MESSAGES',
+  LOGGING_MESSAGES   : 'LOGGING_MESSAGES',
+  CONSOLE_MESSAGES   : 'CONSOLE_MESSAGES',
+  DEVELOPER_MESSAGES : 'DEVELOPER_MESSAGES',
+  AUTOMATION_MESSAGES: 'AUTOMATION_MESSAGES',
 
   //----------- FOR CONSOLE ONLY ------------//
   //-----------------------------------------//
