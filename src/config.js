@@ -1,5 +1,3 @@
-import Request from 'backendless-request'
-
 const isUndefined = value => typeof value === 'undefined'
 const isString = value => typeof value === 'string'
 const isFunction = value => typeof value === 'function'
@@ -9,8 +7,6 @@ export default class RTConfig {
 
   constructor(config) {
     this.appId = null
-    this.lookupPath = null
-    this.lookupHeaders = {}
     this.debugMode = false
     this.connectQuery = {}
     this.socketConfigTransform = null
@@ -38,22 +34,6 @@ export default class RTConfig {
       }
 
       this.appId = config.appId
-    }
-
-    if (!isUndefined(config.lookupPath)) {
-      if (!isString(config.lookupPath)) {
-        throw new Error('"lookupPath" must be String.')
-      }
-
-      this.lookupPath = config.lookupPath
-    }
-
-    if (!isUndefined(config.lookupHeaders)) {
-      if (!isObject(config.lookupHeaders)) {
-        throw new Error('"lookupHeaders" must be Object.')
-      }
-
-      this.lookupHeaders = config.lookupHeaders
     }
 
     if (!isUndefined(config.debugMode)) {
@@ -91,12 +71,14 @@ export default class RTConfig {
   }
 
   async getHost() {
-    let host
+    if (isUndefined(this.hostResolver) || !isFunction(this.hostResolver)) {
+      throw new Error('"hostResolver" must be a function');
+    }
 
-    if (this.hostResolver) {
-      host = await this.hostResolver()
-    } else {
-      host = await Request.get(this.lookupPath).set(this.lookupHeaders)
+    const host = await this.hostResolver()
+
+    if (!host || typeof host !== 'string') {
+      throw new Error('"hostResolver" must return a valid string');
     }
 
     return host
@@ -105,10 +87,6 @@ export default class RTConfig {
   async prepare() {
     const query = this.getConnectQuery()
     const host = await this.getHost()
-
-    if (!host) {
-      throw new Error('Host is not defined')
-    }
 
     const url = this.appId ? `${ host }/${ this.appId }` : host
     const path = this.appId ? `/${ this.appId }` : undefined
