@@ -46,29 +46,29 @@
   "author": "info@backendless.com",
   "license": "ISC",
   "devDependencies": {
-    "@babel/cli": "^7.17.10",
-    "@babel/core": "^7.18.2",
-    "@babel/plugin-proposal-class-properties": "^7.17.12",
-    "@babel/plugin-proposal-decorators": "^7.18.2",
-    "@babel/plugin-transform-object-assign": "^7.16.7",
-    "@babel/plugin-transform-runtime": "^7.18.2",
+    "@babel/cli": "^7.26.4",
+    "@babel/core": "^7.26.7",
+    "@babel/plugin-transform-class-properties": "^7.25.9",
+    "@babel/plugin-proposal-decorators": "^7.25.9",
+    "@babel/plugin-transform-object-assign": "^7.25.9",
+    "@babel/plugin-transform-runtime": "^7.25.9",
     "@babel/polyfill": "^7.12.1",
-    "@babel/preset-env": "^7.18.2",
-    "@babel/register": "^7.17.7",
+    "@babel/preset-env": "^7.26.7",
+    "@babel/register": "^7.25.9",
     "babel-eslint": "^10.1.0",
-    "babel-loader": "^8.2.5",
+    "babel-loader": "^9.2.1",
     "bannerize": "^1.1.4",
     "cross-env": "^7.0.3",
-    "eslint": "^8.16.0",
-    "rimraf": "^3.0.2",
+    "eslint": "^9.19.0",
+    "rimraf": "^5.0.10",
     "watch": "^1.0.2",
-    "terser-webpack-plugin": "^5.3.1",
-    "webpack": "^5.72.1",
-    "webpack-cli": "^4.9.2"
+    "terser-webpack-plugin": "^5.3.11",
+    "webpack": "^5.97.1",
+    "webpack-cli": "^6.0.1"
   },
   "dependencies": {
-    "@babel/runtime": "^7.18.2",
-    "backendless-request": "^0.4.3",
-    "socket.io-client": "^2.0.3"
+    "@babel/runtime": "^7.26.7",
+    "backendless-request": "^0.8.0",
+    "socket.io-client": "^2.5.0"
   }
 }
