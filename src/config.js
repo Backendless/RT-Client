@@ -1,5 +1,3 @@
-import Request from 'backendless-request'
-
 const isUndefined = value => typeof value === 'undefined'
 const isString = value => typeof value === 'string'
 const isFunction = value => typeof value === 'function'
@@ -9,11 +7,10 @@ export default class RTConfig {
 
   constructor(config) {
     this.appId = null
-    this.lookupPath = null
-    this.lookupHeaders = {}
     this.debugMode = false
     this.connectQuery = {}
     this.socketConfigTransform = null
+    this.hostResolver = null
 
     this.socketConfig = null
 
@@ -25,28 +22,18 @@ export default class RTConfig {
       return
     }
 
+    if (!isUndefined(config.hostResolver)) {
+      if (isFunction(config.hostResolver)) {
+        this.hostResolver = config.hostResolver
+      }
+    }
+
     if (!isUndefined(config.appId)) {
       if (!isString(config.appId)) {
         throw new Error('"appId" must be String.')
       }
 
       this.appId = config.appId
-    }
-
-    if (!isUndefined(config.lookupPath)) {
-      if (!isString(config.lookupPath)) {
-        throw new Error('"lookupPath" must be String.')
-      }
-
-      this.lookupPath = config.lookupPath
-    }
-
-    if (!isUndefined(config.lookupHeaders)) {
-      if (!isObject(config.lookupHeaders)) {
-        throw new Error('"lookupHeaders" must be Object.')
-      }
-
-      this.lookupHeaders = config.lookupHeaders
     }
 
     if (!isUndefined(config.debugMode)) {
@@ -79,17 +66,30 @@ export default class RTConfig {
     return this.connectQuery
   }
 
-  async prepare() {
-    if (!isString(this.lookupPath)) {
-      throw new Error('lookupPath must be String')
+  getSocketConfig() {
+    return this.socketConfig
+  }
+
+  async getHost() {
+    if (isUndefined(this.hostResolver) || !isFunction(this.hostResolver)) {
+      throw new Error('"hostResolver" must be a function');
     }
 
-    const host = await Request.get(this.lookupPath).set(this.lookupHeaders)
+    const host = await this.hostResolver()
+
+    if (!host || typeof host !== 'string') {
+      throw new Error('"hostResolver" must return a valid string');
+    }
+
+    return host
+  }
+
+  async prepare() {
+    const query = this.getConnectQuery()
+    const host = await this.getHost()
 
     const url = this.appId ? `${ host }/${ this.appId }` : host
     const path = this.appId ? `/${ this.appId }` : undefined
-
-    const query = this.getConnectQuery()
 
     this.socketConfig = {
       host,
@@ -104,16 +104,8 @@ export default class RTConfig {
     }
 
     if (this.socketConfigTransform) {
-      const socketConfig = await this.socketConfigTransform(this.socketConfig)
-
-      if (socketConfig) {
-        this.socketConfig = socketConfig
-      }
+      this.socketConfig = await this.socketConfigTransform(this.socketConfig) || this.socketConfig
     }
-  }
-
-  getSocketConfig() {
-    return this.socketConfig
   }
 }
 
