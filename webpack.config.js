@@ -3,9 +3,11 @@
 const webpack = require('webpack')
 const path = require('path')
 const TerserPlugin = require('terser-webpack-plugin')
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
 const pkg = require('./package.json')
 
 const isProd = process.env.NODE_ENV === 'production'
+const isAnalyze = process.env.ANALYZE === 'true'
 
 const banner = `********************************************************************************************************************
  *  Backendless RT Client for JavaScript. Version: ${ pkg.version }
@@ -56,8 +58,8 @@ module.exports = {
   },
 
   plugins: [
-    new webpack.NormalModuleReplacementPlugin(/socket\.io-parser/, __dirname + '/src/socket-parser'),
     new webpack.BannerPlugin({ banner }),
+    ...(isAnalyze ? [new BundleAnalyzerPlugin()] : []),
   ],
 }
 
