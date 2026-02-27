@@ -9,16 +9,16 @@
  *  - socket.io-parser
  */
 
-const Emitter = require('component-emitter')
+const { Emitter } = require('@socket.io/component-emitter')
 
-exports.protocol = 4
+exports.protocol = 5
 
 exports.types = [
   'CONNECT',
   'DISCONNECT',
   'EVENT',
   'ACK',
-  'ERROR',
+  'CONNECT_ERROR',
   'BINARY_EVENT',
   'BINARY_ACK'
 ]
@@ -27,7 +27,7 @@ exports.CONNECT = 0
 exports.DISCONNECT = 1
 exports.EVENT = 2
 exports.ACK = 3
-exports.ERROR = 4
+exports.CONNECT_ERROR = 4
 exports.BINARY_EVENT = 5
 exports.BINARY_ACK = 6
 
@@ -196,7 +196,7 @@ Decoder.prototype.destroy = function () {
 
 function error() {
   return {
-    type: exports.ERROR,
+    type: exports.CONNECT_ERROR,
     data: 'parser error'
   }
 }
