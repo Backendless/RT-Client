@@ -55,7 +55,7 @@ export default class RTSocket {
   }
 
   constructor(config, host) {
-    const io = require('socket.io-client')
+    const { io } = require('socket.io-client')
 
     this.config = config
 
